@@ -1,6 +1,11 @@
 let tickets = [];
 let currentFilter = 'all';
 
+// Determine backend base URL. If the site isn't served from the same
+// origin (e.g. when opening index.html directly from the file system),
+// fall back to localhost:3000 where the Express server runs.
+const API_BASE = window.location.port === '3000' ? '' : 'http://localhost:3000';
+
 // DOM elements
 const ticketForm = document.getElementById('ticketForm');
 const ticketsList = document.getElementById('ticketsList');
@@ -22,7 +27,7 @@ ticketForm.addEventListener('submit', async function(e) {
     };
 
     try {
-        const res = await fetch('/api/tickets', {
+        const res = await fetch(`${API_BASE}/api/tickets`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -52,7 +57,7 @@ filterTabs.forEach(tab => {
 
 // Load tickets from backend
 async function loadTickets() {
-    const res = await fetch('/api/tickets');
+    const res = await fetch(`${API_BASE}/api/tickets`);
     tickets = await res.json();
     renderTickets();
     updateStats();
@@ -158,7 +163,7 @@ function getActionButtons(ticket) {
 
 // Update ticket status
 async function updateTicketStatus(ticketId, newStatus) {
-    const res = await fetch(`/api/tickets/${ticketId}`, {
+    const res = await fetch(`${API_BASE}/api/tickets/${ticketId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
