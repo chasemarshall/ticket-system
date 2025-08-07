@@ -1,6 +1,11 @@
 let tickets = [];
 let currentFilter = 'all';
 
+// Determine backend base URL similar to the main site. When the admin
+// page is opened directly from the file system or a different port,
+// fall back to the Express server on localhost:3000.
+const API_BASE = window.location.port === '3000' ? '' : 'http://localhost:3000';
+
 const loginForm = document.getElementById('login-form');
 const loginSection = document.getElementById('login-section');
 const adminSection = document.getElementById('admin-section');
@@ -17,7 +22,7 @@ loginForm.addEventListener('submit', async (e) => {
   const password = document.getElementById('password').value;
 
   try {
-    const res = await fetch('/api/login', {
+    const res = await fetch(`${API_BASE}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -48,7 +53,7 @@ function initAdmin() {
 }
 
 async function loadTickets() {
-  const res = await fetch('/api/tickets');
+  const res = await fetch(`${API_BASE}/api/tickets`);
   tickets = await res.json();
   renderTickets();
   updateStats();
@@ -96,6 +101,7 @@ function renderTickets() {
           ${getActionButtons(ticket)}
           <input type="text" class="note-input" data-note-input="${ticket.id}" placeholder="Note...">
           <button class="btn-small btn-add-note" data-id="${ticket.id}"><span>📝</span> Add Note</button>
+          <button class="btn-small btn-delete" data-id="${ticket.id}"><span>🗑️</span> Delete</button>
         </div>
       </div>
     </div>
@@ -103,6 +109,7 @@ function renderTickets() {
 
   addActionListeners();
   addNoteListeners();
+  addDeleteListeners();
 }
 
 function getCategoryDisplay(category) {
@@ -169,8 +176,17 @@ function addNoteListeners() {
   });
 }
 
+function addDeleteListeners() {
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = parseInt(btn.getAttribute('data-id'), 10);
+      deleteTicket(id);
+    });
+  });
+}
+
 async function updateTicketStatus(id, status) {
-  const res = await fetch(`/api/tickets/${id}`, {
+  const res = await fetch(`${API_BASE}/api/tickets/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status })
@@ -186,8 +202,19 @@ async function updateTicketStatus(id, status) {
   }
 }
 
+async function deleteTicket(id) {
+  const res = await fetch(`${API_BASE}/api/tickets/${id}`, {
+    method: 'DELETE'
+  });
+  if (res.ok) {
+    tickets = tickets.filter(t => t.id !== id);
+    renderTickets();
+    updateStats();
+  }
+}
+
 async function addNote(id, note) {
-  const res = await fetch(`/api/tickets/${id}`, {
+  const res = await fetch(`${API_BASE}/api/tickets/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ note })

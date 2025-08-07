@@ -9,7 +9,7 @@ app.use(express.json());
 // Enable basic CORS support so the API can be accessed from different origins
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
@@ -69,6 +69,16 @@ app.put('/api/tickets/:id', (req, res) => {
   }
   ticket.updatedAt = new Date().toISOString();
   res.json(ticket);
+});
+
+app.delete('/api/tickets/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const index = tickets.findIndex(t => t.id === id);
+  if (index === -1) {
+    return res.status(404).json({ message: 'Ticket not found' });
+  }
+  tickets.splice(index, 1);
+  res.sendStatus(204);
 });
 
 app.listen(PORT, () => {
