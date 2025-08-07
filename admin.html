@@ -16,9 +16,69 @@
                 <button type="submit" class="btn">Login</button>
             </form>
         </div>
+
         <div id="admin-section" style="display:none;">
-            <h1>Ticket Administration</h1>
-            <ul id="admin-ticket-list" class="tickets-list"></ul>
+            <div class="header">
+                <div class="header-content">
+                    <div>
+                        <div class="header-title">
+                            <div class="header-icon">🛠️</div>
+                            <h1>Admin Panel</h1>
+                        </div>
+                        <p>Manage all submitted tickets</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-label">Open Issues</div>
+                        <div class="stat-icon open">⚠️</div>
+                    </div>
+                    <div class="stat-number" id="openCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-label">In Progress</div>
+                        <div class="stat-icon in-progress">⚡</div>
+                    </div>
+                    <div class="stat-number" id="progressCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-label">Resolved</div>
+                        <div class="stat-icon resolved">✅</div>
+                    </div>
+                    <div class="stat-number" id="resolvedCount">0</div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="tickets-section">
+                    <div class="tickets-header">
+                        <div class="section-header">
+                            <div class="section-icon">🎫</div>
+                            <h2 class="section-title">All Tickets</h2>
+                        </div>
+
+                        <div class="filter-tabs">
+                            <div class="filter-tab active" data-filter="all">All</div>
+                            <div class="filter-tab" data-filter="open">Open</div>
+                            <div class="filter-tab" data-filter="in-progress">In Progress</div>
+                            <div class="filter-tab" data-filter="resolved">Resolved</div>
+                        </div>
+                    </div>
+
+                    <div class="tickets-list" id="ticketsList">
+                        <div class="no-tickets">
+                            <div class="no-tickets-icon">📋</div>
+                            <h3>No tickets found</h3>
+                            <p>There are no tickets to manage</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script src="admin.js"></script>

@@ -21,18 +21,22 @@ ticketForm.addEventListener('submit', async function(e) {
         description: document.getElementById('description').value
     };
 
-    const res = await fetch('/api/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
+    try {
+        const res = await fetch('/api/tickets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-    if (res.ok) {
+        if (!res.ok) throw new Error('Request failed');
+
         const ticket = await res.json();
         tickets.unshift(ticket);
         ticketForm.reset();
         renderTickets();
         updateStats();
+    } catch (err) {
+        alert('Unable to create ticket. Please try again.');
     }
 });
 
@@ -89,6 +93,10 @@ function renderTickets() {
             </div>
 
             <div class="ticket-description">${ticket.description}</div>
+            ${ticket.notes && ticket.notes.length ? `
+            <div class="ticket-notes">
+                ${ticket.notes.map(n => `<div class="note">📝 ${n}</div>`).join('')}
+            </div>` : ''}
 
             <div class="ticket-footer">
                 <span class="status-badge ${ticket.status}">${ticket.status.replace('-', ' ')}</span>
