@@ -34,6 +34,7 @@ app.post('/api/tickets', (req, res) => {
     reporter: req.body.reporter,
     description: req.body.description,
     status: 'open',
+    notes: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -47,7 +48,13 @@ app.put('/api/tickets/:id', (req, res) => {
   if (!ticket) {
     return res.status(404).json({ message: 'Ticket not found' });
   }
-  Object.assign(ticket, req.body);
+  if (req.body.status) {
+    ticket.status = req.body.status;
+  }
+  if (req.body.note) {
+    ticket.notes = ticket.notes || [];
+    ticket.notes.push(req.body.note);
+  }
   ticket.updatedAt = new Date().toISOString();
   res.json(ticket);
 });
