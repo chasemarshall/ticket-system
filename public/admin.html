@@ -715,7 +715,6 @@
 
     <script>
         let tickets = [];
-        let ticketCounter = 1;
         let currentFilter = 'all';
 
         // DOM elements
@@ -727,25 +726,28 @@
         const resolvedCount = document.getElementById('resolvedCount');
 
         // Form submission
-        ticketForm.addEventListener('submit', function(e) {
+        ticketForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const ticket = {
-                id: ticketCounter++,
+
+            const payload = {
                 title: document.getElementById('title').value,
                 category: document.getElementById('category').value,
                 priority: document.getElementById('priority').value,
                 reporter: document.getElementById('reporter').value,
-                description: document.getElementById('description').value,
-                status: 'open',
-                createdAt: new Date().toLocaleString(),
-                updatedAt: new Date().toLocaleString()
+                description: document.getElementById('description').value
             };
-            
-            tickets.unshift(ticket);
-            ticketForm.reset();
-            renderTickets();
-            updateStats();
+
+            const res = await fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                ticketForm.reset();
+                fetchTickets();
+            }
         });
 
         // Filter tabs
@@ -757,6 +759,14 @@
                 renderTickets();
             });
         });
+
+        // Fetch tickets from server
+        async function fetchTickets() {
+            const res = await fetch('/api/tickets', { credentials: 'include' });
+            tickets = await res.json();
+            renderTickets();
+            updateStats();
+        }
 
         // Render tickets
         function renderTickets() {
@@ -853,13 +863,15 @@
         }
 
         // Update ticket status
-        function updateTicketStatus(ticketId, newStatus) {
-            const ticket = tickets.find(t => t.id === ticketId);
-            if (ticket) {
-                ticket.status = newStatus;
-                ticket.updatedAt = new Date().toLocaleString();
-                renderTickets();
-                updateStats();
+        async function updateTicketStatus(ticketId, newStatus) {
+            const res = await fetch(`/api/tickets/${ticketId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                fetchTickets();
             }
         }
 
@@ -880,50 +892,7 @@
         }
 
         // Initialize
-        renderTickets();
-        updateStats();
-
-        // Add sample tickets for demonstration
-        setTimeout(() => {
-            const now = new Date();
-            tickets = [
-                {
-                    id: ticketCounter++,
-                    title: "Intermittent WiFi connectivity in master bedroom",
-                    category: "network",
-                    priority: "medium",
-                    reporter: "Sarah Johnson",
-                    description: "WiFi connection drops frequently in the master bedroom, particularly during evening hours. Router restart provides temporary relief but issue recurs within 2-3 hours. Speed tests show significant degradation compared to other areas of the house.",
-                    status: "open",
-                    createdAt: new Date(now - 86400000).toLocaleString(),
-                    updatedAt: new Date(now - 86400000).toLocaleString()
-                },
-                {
-                    id: ticketCounter++,
-                    title: "Smart thermostat unresponsive - system offline",
-                    category: "automation",
-                    priority: "high",
-                    reporter: "Michael Chen",
-                    description: "Nest thermostat display is completely blank and device appears offline in the mobile app. Physical controls non-responsive. House temperature rising as HVAC system not responding to schedule. Issue started approximately 3 hours ago.",
-                    status: "in-progress",
-                    createdAt: new Date(now - 10800000).toLocaleString(),
-                    updatedAt: new Date(now - 7200000).toLocaleString()
-                },
-                {
-                    id: ticketCounter++,
-                    title: "HP LaserJet driver compatibility with new laptop",
-                    category: "hardware",
-                    priority: "low",
-                    reporter: "Jennifer Wilson",
-                    description: "Unable to establish printer connection with new Dell laptop running Windows 11. Printer functions normally with other household devices. Attempted automatic driver installation and manual download from HP website without success.",
-                    status: "resolved",
-                    createdAt: new Date(now - 259200000).toLocaleString(),
-                    updatedAt: new Date(now - 172800000).toLocaleString()
-                }
-            ];
-            renderTickets();
-            updateStats();
-        }, 1000);
+        fetchTickets();
     </script>
 </body>
 </html>
